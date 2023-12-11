@@ -7,6 +7,7 @@ import subprocess
 class auto_pyinstaller:
     def __init__(self, root):
         self.root = root
+        self.root.iconbitmap(r'.\tmp\favicon.ico')
         self.folder_var, self.icon_file_var, self.name_file_var, self.file_top_path, self.file_name = ttk.StringVar(), ttk.StringVar(), ttk.StringVar(), ttk.StringVar(), ttk.StringVar()
         self.name_var, self.icon_var = ttk.BooleanVar(), ttk.BooleanVar()
         self.run_window_var, self.clear_file_var = ttk.BooleanVar(), ttk.BooleanVar()
