@@ -84,8 +84,8 @@ class auto_pyinstaller:
             f = str(self.file_name)
             if '-n' in self.command_display.get():
                 f = self.name_entry.get()
-            remove = 'rd /s /q build&&rd {}.spec'.format(os.path.splitext(f)[0])
-            command = 'cd /d {}&&{}&&{}&&pause&&exit'.format(str(self.file_top_path), remove, self.command_display.get())
+            remove = 'rd /s /q build&&del {}.spec'.format(os.path.splitext(f)[0])
+            command = 'cd /d {}&&{}&&{}&&pause&&exit'.format(str(self.file_top_path), self.command_display.get(), remove)
         else:
             command = 'cd /d {}&&{}&&pause&&exit'.format(str(self.file_top_path), self.command_display.get())
         subprocess.run(['start', 'cmd', '/k', command], shell=True)
@@ -113,7 +113,7 @@ class auto_pyinstaller:
                 self.folder_var.set(file_path), self.command_display_var.set('pyinstaller {} '.format(file_format_option)+self.file_name + ' -w')
             else:
                 self.icon_file_var.set(file_path), self.icon_file_var.set(file_path)
-                self.command_display_var.set(self.command_display.get()+' -i '+file_path)
+                self.command_display_var.set(self.command_display.get()+' -i '+file_path) if '-i' not in self.command_display.get() else None
 
     def mouse(self):
         def disable_scroll(event):
