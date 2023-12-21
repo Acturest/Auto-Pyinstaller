@@ -1,6 +1,7 @@
 import ttkbootstrap as ttk
 from tkinter import filedialog
 import os
+import shutil
 import subprocess
 
 
@@ -66,7 +67,7 @@ class auto_pyinstaller:
         run_window_button = ttk.Checkbutton(child3_1_frame, variable=self.run_window_var, command=self.add_command, bootstyle="success-square-toggle")
         child3_1_frame.grid(row=0, column=0, padx=20), run_command_window.grid(row=0, column=0, padx=20), run_window_button.grid(row=0, column=1)
         clear_superfluous_file = ttk.Label(child3_2_frame, text='清理多余文件', bootstyle="primary")
-        clear_file_button = ttk.Checkbutton(child3_2_frame, variable=self.clear_file_var, bootstyle="success-square-toggle")
+        clear_file_button = ttk.Checkbutton(child3_2_frame, variable=self.clear_file_var, command=self.clear_command, bootstyle="success-square-toggle")
         child3_2_frame.grid(row=0, column=1), clear_superfluous_file.grid(row=0, column=2, padx=20), clear_file_button.grid(row=0, column=3)
         # 子框架4
         child4_frame = ttk.Frame(tab, width=700, height=80)
@@ -81,28 +82,33 @@ class auto_pyinstaller:
         child5_frame.pack(pady=15), run_command.pack(side='right')
 
     def open_cmd_window(self):
-        if self.clear_file_var.get():
-            f = str(self.file_name)
-            if '-n' in self.command_display.get():
-                f = self.name_entry.get()
-            remove = 'rd /s /q build&&del {}.spec'.format(os.path.splitext(f)[0])
-            command = 'cd /d {}&&{}&&{}&&pause&&exit'.format(str(self.file_top_path), self.command_display.get(), remove)
-        else:
-            command = 'cd /d {}&&{}&&pause&&exit'.format(str(self.file_top_path), self.command_display.get())
+        #     command = 'cd /d {}&&{}&&pause&&exit'.format(str(self.file_top_path), self.command_display.get())
+        command = r'cd projectvenv&&pipenv shell'
         subprocess.run(['start', 'cmd', '/k', command], shell=True)
 
     def add_command(self):
         if self.run_window_var.get():
             if '-w' in self.command_display.get():
-                self.command_display_var.set(self.command_display.get()[0:self.command_display.get().find(" -w")]+self.command_display.get()[self.command_display.get().find(" -w")+3:])
+                self.command_display_var.set(self.command_display.get().replace(' -w', ''))
         else:
             if '-w' not in self.command_display.get():
                 self.command_display_var.set(self.command_display.get()+' -w')
 
+    def clear_command(self):
+        if self.clear_file_var.get():
+            f = str(self.file_name)
+            if '-n' in self.command_display.get():
+                f = self.name_entry.get()
+            if os.path.isfile(r'./projectvenv/{}.spec'.format(os.path.splitext(f)[0])) and os.path.isdir(r'./projectvenv/build'):
+                shutil.rmtree(r'./projectvenv/build')
+                os.remove(r'./projectvenv/{}.spec'.format(os.path.splitext(f)[0]))
+
     def open_input(self):
-        folder_path = os.path.abspath(str(self.file_top_path)+'/dist')
+        folder_path = os.path.abspath(r'./projectvenv/dist')
         if os.path.exists(folder_path):
             os.startfile(folder_path)
+        if os.path.exists(str(self.file_top_path)):
+            os.startfile(str(self.file_top_path))
 
     def open_file_input(self, t):
         file_path = filedialog.askopenfilename()
@@ -111,7 +117,7 @@ class auto_pyinstaller:
                 self.file_top_path, self.file_name = os.path.split(file_path)
                 file_format_dict = {"one_file": "-F", "one_dir": "-D"}
                 file_format_option = file_format_dict[self.combobox.get()]
-                self.folder_var.set(file_path), self.command_display_var.set('pyinstaller {} '.format(file_format_option)+self.file_name + ' -w')
+                self.folder_var.set(file_path), self.command_display_var.set('pyinstaller {} '.format(file_format_option)+file_path + ' -w')
             else:
                 self.icon_file_var.set(file_path), self.icon_file_var.set(file_path)
                 self.command_display_var.set(self.command_display.get()+' -i '+file_path) if '-i' not in self.command_display.get() else None
@@ -129,7 +135,7 @@ class auto_pyinstaller:
             self.icon_entry.grid_forget()  # 隐藏
             self.icon_open_path.grid_forget()
             if '-i' in self.command_display.get():
-                self.command_display_var.set(self.command_display.get()[0:self.command_display.get().find("-i")])
+                self.command_display_var.set(self.command_display.get()[0:self.command_display.get().find(" -i")])
 
     def name_frame_display(self):
         if self.name_var.get():
@@ -139,7 +145,7 @@ class auto_pyinstaller:
             self.name_entry.grid_forget()  # 隐藏
             self.name_open.grid_forget()
             if '-n' in self.command_display.get():
-                self.command_display_var.set(self.command_display.get()[0:self.command_display.get().find("-n")])
+                self.command_display_var.set(self.command_display.get()[0:self.command_display.get().find(" -n")])
 
 
 if __name__ == '__main__':
